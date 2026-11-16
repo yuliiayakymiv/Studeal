@@ -16,7 +16,15 @@ README.md   This file
 
 ## How to run
 
-_TODO_
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and `make` (on Windows, run the commands in a WSL terminal).
+
+```sh
+make up      # creates .env from .env.example, builds and starts the database and the API
+make         # lists all commands
+```
+
+- API health check: http://localhost:8000/api/health
+- API docs: http://localhost:8000/api/docs
 
 ## How to deploy
 
