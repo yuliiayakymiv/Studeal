@@ -7,24 +7,54 @@ A website that collects student discounts and events in Lviv: cafés, coworkings
 ## Repository structure
 
 ```
-backend/    API and database
+backend/    FastAPI + PostgreSQL API: app/ (code), alembic/ (migrations), tests/
 frontend/   The website users see
-infra/      Deployment and local setup
-docs/       Demo report
+infra/      Deployment (AWS)
+docs/       Demo report, seed data (docs/data/*.csv)
 README.md   This file
 ```
 
 ## How to run
 
-Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and `make` (on Windows, run the commands in a WSL terminal).
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and `make` (on Windows: run the commands in a WSL terminal and turn on *Settings → Resources → WSL integration* in Docker Desktop).
 
 ```sh
 make up      # creates .env from .env.example, builds and starts the database and the API
+make seed    # loads deals and events from docs/data/*.csv
 make         # lists all commands
 ```
 
 - API health check: http://localhost:8000/api/health
-- API docs: http://localhost:8000/api/docs
+- API docs (try every endpoint in the browser): http://localhost:8000/api/docs
+
+Locally sign-in is off: every request acts as one test user. To turn it on, set `COGNITO_ISSUER` and `COGNITO_CLIENT_ID` in `.env`.
+
+### Backend commands
+
+| Command | What it does |
+|---|---|
+| `make seed` | Load `docs/data/deals.csv` and `events.csv` (safe to re-run, updates instead of duplicating) |
+| `make test` | Backend tests (run in the container against the `studeal_test` database) |
+| `make logs s=backend` | Follow the API logs |
+| `make migration m="..."` | Generate a migration after changing `backend/app/models.py` |
+| `make psql` | Open a psql shell |
+| `make dev-backend` | API on your machine with auto-reload (needs [uv](https://docs.astral.sh/uv/)); the database stays in Docker |
+| `make clean` | Stop and delete the local database |
+
+### API
+
+| Method | Path | Auth | What |
+|---|---|---|---|
+| GET | `/api/health` | — | API and database are up |
+| GET | `/api/deals?category=coffee` | — | Deals, optionally by category |
+| GET | `/api/deals/categories` | — | Categories that have deals |
+| GET | `/api/deals/{id}` | — | One deal |
+| GET | `/api/events` | — | Upcoming events (`?include_past=true` for all) |
+| GET | `/api/me` | token | The signed-in user (`id` = Cognito `sub`) |
+| GET | `/api/me/saved` | token | The user's saved deals |
+| POST / DELETE | `/api/me/saved/{id}` | token | Save / unsave a deal |
+
+Sign-in uses Amazon Cognito (as in spry): the frontend sends the access token as `Authorization: Bearer <token>`, and the API checks its signature, expiry, issuer and app client.
 
 ## How to deploy
 

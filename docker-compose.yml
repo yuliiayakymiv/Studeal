@@ -22,8 +22,12 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       CORS_ORIGINS: ${CORS_ORIGINS}
+      COGNITO_ISSUER: ${COGNITO_ISSUER:-}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:-}
     ports:
       - "8000:8000"
+    volumes:
+      - ./docs/data:/docs/data:ro # CSV files for `make seed`
     depends_on:
       db:
         condition: service_healthy
