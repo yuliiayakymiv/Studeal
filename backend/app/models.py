@@ -23,6 +23,9 @@ class Deal(Base):
     valid_until: Mapped[date | None] = mapped_column(Date)
     source_url: Mapped[str | None] = mapped_column(Text)
     image_url: Mapped[str | None] = mapped_column(Text)  # link to a photo of the venue/offer
+    description: Mapped[str | None] = mapped_column(Text)  # conditions: hours, what to show, etc.
+    # One university only (e.g. "ucu" for the UCU canteen); empty = for everyone.
+    university: Mapped[str | None] = mapped_column(String(20), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -39,6 +42,8 @@ class Event(Base):
     address: Mapped[str | None] = mapped_column(String(300))
     price: Mapped[str | None] = mapped_column(String(100))
     source_url: Mapped[str | None] = mapped_column(Text)
+    image_url: Mapped[str | None] = mapped_column(Text)
+    university: Mapped[str | None] = mapped_column(String(20), index=True)  # e.g. "ucu"
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -52,3 +57,24 @@ class SavedDeal(Base):
         ForeignKey("deals.id", ondelete="CASCADE"), primary_key=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class User(Base):
+    """Someone who signed in at least once (id = Cognito "sub"). Used for the usage stats."""
+
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UserVisit(Base):
+    """One row per user per day they used the site while signed in (to count who came back)."""
+
+    __tablename__ = "user_visits"
+
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    day: Mapped[date] = mapped_column(Date, primary_key=True)

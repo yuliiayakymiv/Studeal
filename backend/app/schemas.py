@@ -15,6 +15,8 @@ class DealOut(BaseModel):
     valid_until: date | None
     source_url: str | None
     image_url: str | None
+    description: str | None
+    university: str | None
 
 
 class EventOut(BaseModel):
@@ -27,7 +29,24 @@ class EventOut(BaseModel):
     address: str | None
     price: str | None
     source_url: str | None
+    image_url: str | None
+    university: str | None
 
 
 class MeOut(BaseModel):
     id: str
+
+
+class TopDeal(BaseModel):
+    id: int
+    venue: str
+    title: str
+    saves: int
+
+
+class StatsOut(BaseModel):
+    users_total: int  # signed in at least once
+    users_returned: int  # used the site on 2+ different days
+    users_active_7d: int  # signed in during the last 7 days
+    saved_total: int  # deals saved, all users together
+    top_saved: list[TopDeal]

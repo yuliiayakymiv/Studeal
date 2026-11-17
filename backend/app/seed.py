@@ -1,8 +1,9 @@
 """Load deals and events from CSV files into the database. Safe to re-run.
 
 Files (one header row, UTF-8, exported from Google Sheets: File → Download → CSV):
-  docs/data/deals.csv   venue,title,category,discount,address,valid_until,source_url[,image_url]
-  docs/data/events.csv  title,venue,starts_at,address,price,source_url
+  docs/data/deals.csv   venue,title,category,discount,address,valid_until,source_url
+                        [,image_url,description,university]
+  docs/data/events.csv  title,venue,starts_at,address,price,source_url[,image_url,university]
 
 A row with the same deal (venue + title) or event (title + starts_at) is updated, not duplicated.
 Dates: valid_until = 2026-12-31 (or empty), starts_at = 2026-11-20 19:00 (Kyiv time).
@@ -34,9 +35,21 @@ DEAL_FIELDS = [
     "valid_until",
     "source_url",
     "image_url",
+    "description",
+    "university",
 ]
-EVENT_FIELDS = ["title", "venue", "starts_at", "address", "price", "source_url"]
-OPTIONAL_COLUMNS = {"image_url"}  # may be left out of the CSV entirely
+EVENT_FIELDS = [
+    "title",
+    "venue",
+    "starts_at",
+    "address",
+    "price",
+    "source_url",
+    "image_url",
+    "university",
+]
+# May be left out of the CSV entirely.
+OPTIONAL_COLUMNS = {"image_url", "description", "university"}
 
 
 def _clean(value: str | None) -> str | None:
@@ -62,6 +75,7 @@ def _parse_deal(row: dict, line: int) -> dict:
     if row["valid_until"]:
         row["valid_until"] = date.fromisoformat(row["valid_until"])
     row["category"] = row["category"].lower()
+    row["university"] = row["university"] and row["university"].lower()
     return row
 
 
@@ -70,6 +84,7 @@ def _parse_event(row: dict, line: int) -> dict:
         sys.exit(f"events.csv line {line}: title and starts_at are required")
     starts = datetime.fromisoformat(row["starts_at"])
     row["starts_at"] = starts if starts.tzinfo else starts.replace(tzinfo=KYIV)
+    row["university"] = row["university"] and row["university"].lower()
     return row
 
 

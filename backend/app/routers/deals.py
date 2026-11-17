@@ -9,10 +9,15 @@ router = APIRouter(prefix="/deals", tags=["deals"])
 
 
 @router.get("", response_model=list[DealOut])
-async def list_deals(session: SessionDep, category: str | None = None) -> list[Deal]:
+async def list_deals(
+    session: SessionDep, category: str | None = None, university: str | None = None
+) -> list[Deal]:
+    """All deals; `?category=coffee`, `?university=ucu` (only that university's places)."""
     query = select(Deal).order_by(Deal.venue, Deal.title)
     if category:
         query = query.where(Deal.category == category)
+    if university:
+        query = query.where(Deal.university == university.lower())
     return list(await session.scalars(query))
 
 
