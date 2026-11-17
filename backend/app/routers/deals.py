@@ -1,6 +1,9 @@
+import uuid
+
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import or_, select
 
+from app.auth import UserDep
 from app.db import SessionDep
 from app.models import Deal
 from app.schemas import DealOut
@@ -11,6 +14,7 @@ router = APIRouter(prefix="/deals", tags=["deals"])
 @router.get("", response_model=list[DealOut])
 async def list_deals(
     session: SessionDep,
+    _user: UserDep,
     category: str | None = None,
     university: str | None = None,
     q: str | None = None,
@@ -40,12 +44,12 @@ async def list_deals(
 
 
 @router.get("/categories", response_model=list[str])
-async def list_categories(session: SessionDep) -> list[str]:
+async def list_categories(session: SessionDep, _user: UserDep) -> list[str]:
     return list(await session.scalars(select(Deal.category).distinct().order_by(Deal.category)))
 
 
 @router.get("/{deal_id}", response_model=DealOut)
-async def get_deal(deal_id: int, session: SessionDep) -> Deal:
+async def get_deal(deal_id: uuid.UUID, session: SessionDep, _user: UserDep) -> Deal:
     deal = await session.get(Deal, deal_id)
     if deal is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Deal not found")

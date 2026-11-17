@@ -1,5 +1,6 @@
 """University filter, deal conditions, event photos and usage stats."""
 
+import uuid
 from datetime import UTC, date, datetime, timedelta
 
 from httpx import AsyncClient
@@ -36,18 +37,16 @@ async def test_university_filter_for_deals_and_events(client: AsyncClient) -> No
 
 
 async def test_stats_count_users_returns_and_saves(client: AsyncClient) -> None:
-    empty = (await client.get("/api/stats")).json()
-    assert empty == {
-        "users_total": 0,
+    # Any signed-in call records the user and today's visit (auth off: user "local").
+    first = (await client.get("/api/stats")).json()
+    assert first == {
+        "users_total": 1,
         "users_returned": 0,
-        "users_active_7d": 0,
+        "users_active_7d": 1,
         "saved_total": 0,
         "top_saved": [],
     }
-
-    # Signing in (any /api/me call) records the user and today's visit.
-    assert (await client.get("/api/me")).status_code == 200
-    await client.get("/api/me")  # same day twice = still one visit day
+    await client.get("/api/deals")  # same day again = still one visit day
 
     # A second user who came back on another day and saved a deal.
     old = datetime.now(UTC) - timedelta(days=30)
@@ -61,7 +60,7 @@ async def test_stats_count_users_returns_and_saves(client: AsyncClient) -> None:
         client,
         UserVisit(user_id="user-b", day=date(2026, 1, 1)),
         UserVisit(user_id="user-b", day=date(2026, 1, 2)),
-        SavedDeal(user_id="user-b", deal_id=deal_id),
+        SavedDeal(user_id="user-b", deal_id=uuid.UUID(deal_id)),
     )
     assert (await client.post(f"/api/me/saved/{deal_id}")).status_code == 204
 

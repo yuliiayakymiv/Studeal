@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -6,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class DealOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: uuid.UUID
     venue: str
     title: str
     category: str
@@ -22,7 +23,7 @@ class DealOut(BaseModel):
 class EventOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: uuid.UUID
     title: str
     venue: str | None
     starts_at: datetime
@@ -38,7 +39,7 @@ class MeOut(BaseModel):
 
 
 class TopDeal(BaseModel):
-    id: int
+    id: uuid.UUID
     venue: str
     title: str
     saves: int

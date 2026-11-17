@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
@@ -43,7 +44,8 @@ async def test_deals_list_filter_and_get(client: AsyncClient) -> None:
 
     one = await client.get(f"/api/deals/{all_deals[0]['id']}")
     assert one.status_code == 200 and one.json()["title"] == "-10% coffee"
-    assert (await client.get("/api/deals/999999")).status_code == 404
+    assert (await client.get(f"/api/deals/{uuid.uuid4()}")).status_code == 404
+    assert (await client.get("/api/deals/123")).status_code == 422  # ids are UUIDs, as in spry
 
 
 async def test_events_upcoming_only(client: AsyncClient) -> None:
@@ -70,7 +72,7 @@ async def test_save_and_unsave_deal(client: AsyncClient) -> None:
 
     assert (await client.delete(f"/api/me/saved/{deal_id}")).status_code == 204
     assert (await client.get("/api/me/saved")).json() == []
-    assert (await client.post("/api/me/saved/999999")).status_code == 404
+    assert (await client.post(f"/api/me/saved/{uuid.uuid4()}")).status_code == 404
 
 
 async def test_seed_from_csv_is_rerunnable(

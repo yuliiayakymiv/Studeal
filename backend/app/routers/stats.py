@@ -1,6 +1,6 @@
 """Usage numbers for the demo report: how many people tried Studeal and how many came back.
 
-Only totals, no personal data. A user counts once they open the site signed in (any /api/me call).
+Only totals, no personal data. A user counts from their first signed-in API call.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter
 from sqlalchemy import func, select
 
+from app.auth import UserDep
 from app.db import SessionDep
 from app.models import Deal, SavedDeal, User, UserVisit
 from app.schemas import StatsOut, TopDeal
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 
 
 @router.get("", response_model=StatsOut)
-async def stats(session: SessionDep) -> StatsOut:
+async def stats(session: SessionDep, _user: UserDep) -> StatsOut:
     users_total = await session.scalar(select(func.count()).select_from(User))
 
     days_per_user = (

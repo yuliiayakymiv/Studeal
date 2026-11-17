@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter
 from sqlalchemy import or_, select
 
+from app.auth import UserDep
 from app.db import SessionDep
 from app.models import Event
 from app.schemas import EventOut
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/events", tags=["events"])
 @router.get("", response_model=list[EventOut])
 async def list_events(
     session: SessionDep,
+    _user: UserDep,
     include_past: bool = False,
     university: str | None = None,
     q: str | None = None,

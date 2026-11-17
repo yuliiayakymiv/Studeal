@@ -43,14 +43,21 @@ def bearer(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
-async def test_public_endpoints_need_no_token(client: AsyncClient, cognito) -> None:
-    for path in ("/api/health", "/api/deals", "/api/events"):
-        assert (await client.get(path)).status_code == 200
+async def test_only_health_is_public(client: AsyncClient, cognito) -> None:
+    assert (await client.get("/api/health")).status_code == 200
+    for path in (
+        "/api/deals",
+        "/api/deals/categories",
+        "/api/events",
+        "/api/stats",
+        "/api/me",
+        "/api/me/saved",
+    ):
+        assert (await client.get(path)).status_code == 401, path
 
 
-async def test_me_without_token_is_401(client: AsyncClient, cognito) -> None:
-    for path in ("/api/me", "/api/me/saved"):
-        assert (await client.get(path)).status_code == 401
+async def test_signed_in_user_sees_deals(client: AsyncClient, cognito) -> None:
+    assert (await client.get("/api/deals", headers=bearer(make_token()))).status_code == 200
 
 
 async def test_valid_token_returns_sub(client: AsyncClient, cognito) -> None:
@@ -78,10 +85,9 @@ async def test_users_see_only_their_saved_deals(client: AsyncClient, cognito) ->
     from tests.test_api import _add
 
     await _add(client, Deal(venue="Cafe A", title="-10% coffee", category="coffee"))
-    deal_id = (await client.get("/api/deals")).json()[0]["id"]
-
     a = bearer(make_token(sub="user-a"))
     b = bearer(make_token(sub="user-b"))
+    deal_id = (await client.get("/api/deals", headers=a)).json()[0]["id"]
     assert (await client.post(f"/api/me/saved/{deal_id}", headers=a)).status_code == 204
     assert len((await client.get("/api/me/saved", headers=a)).json()) == 1
     assert (await client.get("/api/me/saved", headers=b)).json() == []

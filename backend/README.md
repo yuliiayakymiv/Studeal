@@ -19,16 +19,16 @@ FastAPI + PostgreSQL (async SQLAlchemy, Alembic), same setup as spry. Run everyt
 | Method | Path | Auth | What |
 |---|---|---|---|
 | GET | `/api/health` | — | API and database are up |
-| GET | `/api/deals?category=coffee&university=ucu&q=кава` | — | Deals; filter by category, university, search text (all optional) |
-| GET | `/api/deals/categories` | — | Categories that have deals |
-| GET | `/api/deals/{id}` | — | One deal |
-| GET | `/api/events` | — | Upcoming events (`?university=ucu`, `?q=` search, `?include_past=true` for all) |
-| GET | `/api/stats` | — | Usage totals for the report: users, users who came back, saves, top saved deals |
+| GET | `/api/deals?category=coffee&university=ucu&q=кава` | token | Deals; filter by category, university, search text (all optional) |
+| GET | `/api/deals/categories` | token | Categories that have deals |
+| GET | `/api/deals/{id}` | token | One deal |
+| GET | `/api/events` | token | Upcoming events (`?university=ucu`, `?q=` search, `?include_past=true` for all) |
+| GET | `/api/stats` | token | Usage totals for the report: users, users who came back, saves, top saved deals |
 | GET | `/api/me` | token | The signed-in user (`id` = Cognito `sub`) |
 | GET | `/api/me/saved` | token | The user's saved deals |
 | POST / DELETE | `/api/me/saved/{id}` | token | Save / unsave a deal |
 
-A user is counted in `/api/stats` once the site calls any `/api/me` endpoint for them (the frontend should call `GET /api/me` after sign-in).
+Everything except `/api/health` needs sign-in, as in spry: the site can have a public landing page, but deals and events load only after sign-in. Every signed-in call also counts the user for `/api/stats`. Ids are UUIDs.
 
 Sign-in uses Amazon Cognito (as in spry): the frontend sends the access token as `Authorization: Bearer <token>`, and the API checks its signature, expiry, issuer and app client.
 

@@ -1,16 +1,22 @@
 """Who is calling? Verifies the Cognito access token sent as `Authorization: Bearer <token>`.
 
-Same approach as spry (Lab 4). Deals and events are public; only /api/me/* needs a token.
+Same approach as spry (Lab 4): every /api call except /api/health needs a valid token.
+The frontend can still show a public landing page; the data itself is only for signed-in users.
 """
 
+from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.dialects.postgresql import insert
 
 from app.config import settings
+from app.db import SessionDep
+from app.models import User, UserVisit
 
 LOCAL_USER = "local"  # the single user when auth is off (docker compose, tests)
 
@@ -65,4 +71,24 @@ def current_user(
     return verify_access_token(credentials.credentials)["sub"]
 
 
-UserDep = Annotated[str, Depends(current_user)]
+KYIV = ZoneInfo("Europe/Kyiv")
+
+
+async def signed_in_user(user: Annotated[str, Depends(current_user)], session: SessionDep) -> str:
+    """current_user + records that this user used the site today (for /api/stats)."""
+    now = datetime.now(UTC)
+    await session.execute(
+        insert(User)
+        .values(id=user, first_seen=now, last_seen=now)
+        .on_conflict_do_update(index_elements=[User.id], set_={"last_seen": now})
+    )
+    await session.execute(
+        insert(UserVisit)
+        .values(user_id=user, day=now.astimezone(KYIV).date())
+        .on_conflict_do_nothing()
+    )
+    await session.commit()
+    return user
+
+
+UserDep = Annotated[str, Depends(signed_in_user)]
