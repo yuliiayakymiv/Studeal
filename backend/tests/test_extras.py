@@ -73,3 +73,33 @@ async def test_stats_count_users_returns_and_saves(client: AsyncClient) -> None:
     assert stats["top_saved"] == [
         {"id": deal_id, "venue": "Cafe A", "title": "-10% coffee", "saves": 2}
     ]
+
+
+async def test_search_deals_and_events(client: AsyncClient) -> None:
+    soon = datetime.now(UTC) + timedelta(days=1)
+    await _add(
+        client,
+        Deal(venue="Кав'ярня Зерно", title="Лате зі знижкою", category="coffee"),
+        Deal(
+            venue="Gym B",
+            title="Student month",
+            category="sport",
+            description="Безлімітна кава після тренування",
+        ),
+        Deal(venue="Cinema", title="Tickets", category="cinema", address="вул. Кавова 5"),
+        Deal(venue="Coworking", title="Day pass", category="coworking"),
+        Event(title="Квіз у кав'ярні", starts_at=soon),
+        Event(title="Concert", venue="КАВА club", starts_at=soon),
+        Event(title="Lecture", starts_at=soon),
+    )
+
+    found = (await client.get("/api/deals", params={"q": "  КАВ "})).json()
+    assert {d["venue"] for d in found} == {"Кав'ярня Зерно", "Gym B", "Cinema"}
+
+    combined = (await client.get("/api/deals", params={"q": "кав", "category": "sport"})).json()
+    assert [d["venue"] for d in combined] == ["Gym B"]
+
+    assert len((await client.get("/api/deals", params={"q": ""})).json()) == 4  # empty = all
+
+    events = (await client.get("/api/events", params={"q": "кав"})).json()
+    assert {e["title"] for e in events} == {"Квіз у кав'ярні", "Concert"}

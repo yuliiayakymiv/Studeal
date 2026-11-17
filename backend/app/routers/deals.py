@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from app.db import SessionDep
 from app.models import Deal
@@ -10,14 +10,32 @@ router = APIRouter(prefix="/deals", tags=["deals"])
 
 @router.get("", response_model=list[DealOut])
 async def list_deals(
-    session: SessionDep, category: str | None = None, university: str | None = None
+    session: SessionDep,
+    category: str | None = None,
+    university: str | None = None,
+    q: str | None = None,
 ) -> list[Deal]:
-    """All deals; `?category=coffee`, `?university=ucu` (only that university's places)."""
+    """All deals. Filters can be combined:
+
+    - `?category=coffee`
+    - `?university=ucu` — only that university's places
+    - `?q=кава` — search in venue, title, conditions and address (case-insensitive)
+    """
     query = select(Deal).order_by(Deal.venue, Deal.title)
     if category:
         query = query.where(Deal.category == category)
     if university:
         query = query.where(Deal.university == university.lower())
+    if q and q.strip():
+        pattern = f"%{q.strip()}%"
+        query = query.where(
+            or_(
+                Deal.venue.ilike(pattern),
+                Deal.title.ilike(pattern),
+                Deal.description.ilike(pattern),
+                Deal.address.ilike(pattern),
+            )
+        )
     return list(await session.scalars(query))
 
 

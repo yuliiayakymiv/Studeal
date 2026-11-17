@@ -19,10 +19,10 @@ FastAPI + PostgreSQL (async SQLAlchemy, Alembic), same setup as spry. Run everyt
 | Method | Path | Auth | What |
 |---|---|---|---|
 | GET | `/api/health` | — | API and database are up |
-| GET | `/api/deals?category=coffee&university=ucu` | — | Deals, optionally by category and/or university |
+| GET | `/api/deals?category=coffee&university=ucu&q=кава` | — | Deals; filter by category, university, search text (all optional) |
 | GET | `/api/deals/categories` | — | Categories that have deals |
 | GET | `/api/deals/{id}` | — | One deal |
-| GET | `/api/events` | — | Upcoming events (`?university=ucu`, `?include_past=true` for all) |
+| GET | `/api/events` | — | Upcoming events (`?university=ucu`, `?q=` search, `?include_past=true` for all) |
 | GET | `/api/stats` | — | Usage totals for the report: users, users who came back, saves, top saved deals |
 | GET | `/api/me` | token | The signed-in user (`id` = Cognito `sub`) |
 | GET | `/api/me/saved` | token | The user's saved deals |
