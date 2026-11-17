@@ -94,6 +94,7 @@ async def test_seed_from_csv_is_rerunnable(
 
     deals = (await client.get("/api/deals")).json()
     assert len(deals) == 1 and deals[0]["category"] == "coffee"
+    assert deals[0]["image_url"] is None  # image_url column is optional in the CSV
     events = (await client.get("/api/events")).json()
     assert len(events) == 1 and events[0]["starts_at"].startswith("2030-01-10T17:00")  # Kyiv → UTC
 

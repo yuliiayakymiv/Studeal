@@ -22,6 +22,7 @@ class Deal(Base):
     address: Mapped[str | None] = mapped_column(String(300))
     valid_until: Mapped[date | None] = mapped_column(Date)
     source_url: Mapped[str | None] = mapped_column(Text)
+    image_url: Mapped[str | None] = mapped_column(Text)  # link to a photo of the venue/offer
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

@@ -1,7 +1,7 @@
 """Load deals and events from CSV files into the database. Safe to re-run.
 
 Files (one header row, UTF-8, exported from Google Sheets: File → Download → CSV):
-  docs/data/deals.csv   venue,title,category,discount,address,valid_until,source_url
+  docs/data/deals.csv   venue,title,category,discount,address,valid_until,source_url[,image_url]
   docs/data/events.csv  title,venue,starts_at,address,price,source_url
 
 A row with the same deal (venue + title) or event (title + starts_at) is updated, not duplicated.
@@ -25,8 +25,18 @@ from app.models import Deal, Event
 
 KYIV = ZoneInfo("Europe/Kyiv")
 
-DEAL_FIELDS = ["venue", "title", "category", "discount", "address", "valid_until", "source_url"]
+DEAL_FIELDS = [
+    "venue",
+    "title",
+    "category",
+    "discount",
+    "address",
+    "valid_until",
+    "source_url",
+    "image_url",
+]
 EVENT_FIELDS = ["title", "venue", "starts_at", "address", "price", "source_url"]
+OPTIONAL_COLUMNS = {"image_url"}  # may be left out of the CSV entirely
 
 
 def _clean(value: str | None) -> str | None:
@@ -40,7 +50,7 @@ def _read(path: Path, fields: list[str]) -> list[dict]:
         return []
     with path.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        missing = set(fields) - set(reader.fieldnames or [])
+        missing = set(fields) - set(reader.fieldnames or []) - OPTIONAL_COLUMNS
         if missing:
             sys.exit(f"{path.name}: missing columns {sorted(missing)}")
         return [{k: _clean(row.get(k)) for k in fields} for row in reader if any(row.values())]

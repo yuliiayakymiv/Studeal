@@ -14,6 +14,7 @@ class DealOut(BaseModel):
     address: str | None
     valid_until: date | None
     source_url: str | None
+    image_url: str | None
 
 
 class EventOut(BaseModel):
