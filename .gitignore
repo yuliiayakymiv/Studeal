@@ -8,3 +8,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
+
+# Temporary files written by infra/aws scripts (contain your account id)
+*.rendered.json
+*.rendered.js
+infra/aws/.state*
+infra/aws/setup.log
+backend/seed_data/
