@@ -1,6 +1,6 @@
 # Studeal
 
-A website that collects student discounts and events in Lviv: cafés, coworkings, gyms, concerts and workshops that give a discount for a student ID. Students sign in, browse deals and events by category, filter places of their university (UCU), search and save deals.
+A website that collects student discounts and events in Lviv: cafés, coworkings, gyms, concerts and workshops that give a discount for a student ID. After signing in, students browse deals and events by category, filter places of their university (UCU), search deals and save the ones they like.
 
 **Team:** Yuliia Yakymiv, Yuliia Dub, Khrystyna Shymushovska
 
@@ -8,15 +8,15 @@ A website that collects student discounts and events in Lviv: cafés, coworkings
 
 ```
 backend/    FastAPI + PostgreSQL API: app/ (code), alembic/ (migrations), tests/
-frontend/   React + Vite + shadcn/ui website, sign-in with Amazon Cognito
-infra/      Deployment to AWS
+frontend/   React + Vite website, sign-in with Amazon Cognito
+infra/      Deployment
 docs/       Demo report, seed data (docs/data/*.csv)
 README.md   This file
 ```
 
 ## How to run locally
 
-You need [Docker Desktop](https://www.docker.com/products/docker-desktop/), `make` and [Node.js 20+](https://nodejs.org). On Windows run the commands in a WSL terminal and turn on *Settings → Resources → WSL integration* in Docker Desktop.
+You need [Docker Desktop](https://www.docker.com/products/docker-desktop/), `make` and [Node.js](https://nodejs.org) 20.19+ or 22.12+. On Windows run the commands in a WSL terminal and turn on *Settings → Resources → WSL integration* in Docker Desktop.
 
 **1. Backend and database**
 
@@ -36,28 +36,12 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. Vite forwards `/api` calls to the backend on port 8000.
+Open http://localhost:5173. Requests to `/api` go to the backend on port 8000.
 
-Locally sign-in is off on both sides, so you can use the whole site without an AWS account. To test real sign-in, fill the Cognito values in `.env` (backend) and `frontend/.env.local` (see [`frontend/README.md`](frontend/README.md)).
+In local mode sign-in is skipped on both sides, so the whole site works without an AWS account.
 
-More: [`backend/README.md`](backend/README.md) (commands, API, sign-in) · [`frontend/README.md`](frontend/README.md) (pages, configuration).
+More: [`backend/README.md`](backend/README.md) · [`frontend/README.md`](frontend/README.md).
 
 ## How to deploy
 
-Studeal runs on AWS in `eu-central-1`, the same setup as in the course labs:
-
-```
-browser ──HTTPS──▶ CloudFront ──▶ S3                     (frontend: built React app)
-                       └── /api/* ──▶ ALB ──▶ ECS Fargate (backend container) ──▶ RDS PostgreSQL
-sign-in: Amazon Cognito user pool (Hosted UI, email + password)
-```
-
-Steps (scripts and details for each step live in [`infra/`](infra/)):
-
-1. **Cognito**: create a user pool and an app client with Hosted UI; callback and sign-out URL = the CloudFront URL.
-2. **Database**: RDS PostgreSQL.
-3. **Backend**: build `backend/Dockerfile`, push it to ECR, run it on ECS Fargate behind an ALB (container port `8000`, health check `/api/health`). Set `DATABASE_URL` (`postgresql+asyncpg://…` pointing at RDS), `CORS_ORIGINS` (the CloudFront URL), `COGNITO_ISSUER`, `COGNITO_CLIENT_ID`. Migrations run automatically when the container starts.
-4. **Data**: run `python -m app.seed` once as a one-off ECS task to load the deals.
-5. **Frontend**: set `VITE_COGNITO_ISSUER`, `VITE_COGNITO_CLIENT_ID`, `VITE_COGNITO_DOMAIN`, run `npm run build` in `frontend/`, upload `frontend/dist/` to S3 and invalidate CloudFront. CloudFront sends `/api/*` to the ALB and everything else to S3 (unknown paths → `index.html`).
-
-The site is then available at `https://<distribution>.cloudfront.net`. Set up an AWS Budgets alert so the free tier is not exceeded.
+_Not deployed yet._
