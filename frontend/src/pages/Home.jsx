@@ -14,7 +14,7 @@ export default function Home() {
           Щоб побачити знижки й події, увійдіть або зареєструйтеся.
         </p>
         <Button size="lg" onClick={() => auth.signinRedirect()}>
-          Sign in / Зареєструватися
+          Sign in / Sign up
         </Button>
       </section>
     );
