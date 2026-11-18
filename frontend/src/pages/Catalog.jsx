@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { apiFetch } from "@/lib/api";
+import { DEAL_CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DealCard from "@/components/DealCard";
@@ -15,9 +16,9 @@ export default function Catalog() {
   const q = params.get("q") || "";
 
   const [search, setSearch] = useState(q);
-  const [categories, setCategories] = useState([]);
   const [deals, setDeals] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
   function updateParam(key, value) {
@@ -35,14 +36,8 @@ export default function Catalog() {
 
   useEffect(() => {
     if (!token) return;
-    apiFetch("/deals/categories", { token })
-      .then(setCategories)
-      .catch(() => setError("Не вдалося завантажити категорії."));
-  }, [token]);
-
-  useEffect(() => {
-    if (!token) return;
     setError("");
+    setLoaded(false);
     Promise.all([
       apiFetch("/me/saved", { token }),
       apiFetch("/deals", { token, params: { category, university, q } }),
@@ -51,7 +46,8 @@ export default function Catalog() {
         setSavedIds(new Set(saved.map((d) => d.id)));
         setDeals(list);
       })
-      .catch(() => setError("Помилка завантаження. Чи запущено API?"));
+      .catch(() => setError("Помилка завантаження. Чи запущено API?"))
+      .finally(() => setLoaded(true));
   }, [token, category, university, q]);
 
   async function toggleSave(id, on) {
@@ -74,14 +70,14 @@ export default function Catalog() {
         <Button size="sm" variant={!category ? "default" : "outline"} onClick={() => updateParam("category", "")}>
           Усі категорії
         </Button>
-        {categories.map((c) => (
+        {DEAL_CATEGORIES.map((c) => (
           <Button
-            key={c}
+            key={c.value}
             size="sm"
-            variant={category === c ? "default" : "outline"}
-            onClick={() => updateParam("category", c)}
+            variant={category === c.value ? "default" : "outline"}
+            onClick={() => updateParam("category", c.value)}
           >
-            {c}
+            {c.label}
           </Button>
         ))}
         <Button
@@ -93,10 +89,21 @@ export default function Catalog() {
         </Button>
       </div>
 
-      <Input placeholder="Пошук: кава, спортзал, коворкінг…" value={search} onChange={(e) => setSearch(e.target.value)} />
+      <Input
+        placeholder="Пошук: кава, спортзал, коворкінг…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
       {error && <p className="text-destructive">{error}</p>}
-      <p className="text-sm text-muted-foreground">Знайдено: {deals.length}</p>
+
+      {!error && loaded && deals.length === 0 && (
+        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+          Вибачте, зараз нема дійсних знижок.
+        </p>
+      )}
+
+      {deals.length > 0 && <p className="text-sm text-muted-foreground">Знайдено: {deals.length}</p>}
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {deals.map((d) => (
