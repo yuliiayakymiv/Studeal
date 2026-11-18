@@ -16,14 +16,19 @@ async def list_events(
     session: SessionDep,
     _user: UserDep,
     include_past: bool = False,
+    category: str | None = None,
     university: str | None = None,
     q: str | None = None,
 ) -> list[Event]:
     """Upcoming events, soonest first (started in the last 6 hours still counts).
 
-    `?university=ucu` — only events of that university; `?q=квіз` — search in title and venue.
+    - `?category=quiz` — only that category
+    - `?university=ucu` — only events of that university
+    - `?q=квіз` — search in title and venue
     """
     query = select(Event).order_by(Event.starts_at)
+    if category:
+        query = query.where(Event.category == category.lower())
     if university:
         query = query.where(Event.university == university.lower())
     if q and q.strip():
@@ -31,4 +36,15 @@ async def list_events(
         query = query.where(or_(Event.title.ilike(pattern), Event.venue.ilike(pattern)))
     if not include_past:
         query = query.where(Event.starts_at >= datetime.now(UTC) - timedelta(hours=6))
+    return list(await session.scalars(query))
+
+
+@router.get("/categories", response_model=list[str])
+async def list_categories(session: SessionDep, _user: UserDep) -> list[str]:
+    query = (
+        select(Event.category)
+        .where(Event.category.is_not(None))
+        .distinct()
+        .order_by(Event.category)
+    )
     return list(await session.scalars(query))
