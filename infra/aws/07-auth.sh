@@ -4,7 +4,7 @@ source "$(dirname "$0")/env.sh"
 cd "$(dirname "$0")/../.."
 : "${CF_DIST_ID:?run 05-frontend.sh first}" "${CF_DOMAIN:?run 05-frontend.sh first}"
 
-envval() { grep -E "^$1=" .env 2>/dev/null | tail -1 | cut -d= -f2- | tr -d '\r"'; }
+envval() { grep -E "^$1=" .env 2>/dev/null | tail -1 | cut -d= -f2- | tr -d '\r"' || true; }
 PREFIX="${COGNITO_DOMAIN_PREFIX:-$(envval COGNITO_DOMAIN_PREFIX)}"
 if [[ -z "$PREFIX" ]]; then
   PREFIX="studeal-$ACCOUNT_ID"
