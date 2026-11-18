@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studeal — події</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#fff; --text:#1d2433; --muted:#6b7280; --accent:#4f46e5; --line:#e5e7eb; }
+    [hidden] { display:none !important; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+    header { background:var(--card); border-bottom:1px solid var(--line); padding:16px 20px; position:sticky; top:0; z-index:5; }
+    .wrap { max-width:1000px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    h1 { margin:0; font-size:24px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .tab, .chip, .login { border:1px solid var(--line); background:var(--card); padding:8px 14px; border-radius:999px; cursor:pointer; font:inherit; color:var(--text); text-decoration:none; }
+    .tab.active, .chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .login { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .search { width:100%; padding:10px 14px; border:1px solid var(--line); border-radius:10px; font:inherit; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; }
+    main { max-width:1000px; margin:20px auto; padding:0 20px; }
+    .landing { max-width:600px; margin:60px auto; text-align:center; }
+    .landing h2 { font-size:28px; }
+    .landing p { color:var(--muted); line-height:1.5; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+    .card { background:var(--card); border-radius:14px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06); display:flex; flex-direction:column; }
+    .card img, .placeholder { width:100%; height:140px; object-fit:cover; background:#eef0f6; }
+    .placeholder { display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:14px; }
+    .body { padding:14px; display:flex; flex-direction:column; gap:6px; flex:1; }
+    .date { color:var(--accent); font-weight:600; font-size:14px; }
+    .title { font-weight:600; }
+    .venue, .meta { color:var(--muted); font-size:14px; margin:0; }
+    .price { display:inline-block; align-self:flex-start; background:#ecfdf5; color:#047857; padding:2px 8px; border-radius:6px; font-weight:600; font-size:13px; }
+    .card a { color:var(--accent); font-size:14px; margin-top:auto; }
+    .status { color:var(--muted); padding:20px 0; }
+    .error { color:#b91c1c; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Studeal</h1>
+      <div id="auth-box"></div>
+    </div>
+    <div data-auth="in" hidden>
+      <div class="tabs">
+        <a class="tab" href="index.html">Знижки</a>
+        <a class="tab active" href="events.html">Події</a>
+      </div>
+      <div class="tabs">
+        <button class="tab" data-university="ucu">УКУ</button>
+      </div>
+      <input id="search" class="search" type="search" placeholder="Пошук: квіз, концерт, лекція…" />
+      <div id="chips" class="chips"></div>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <section class="landing" data-auth="out" hidden>
+    <h2>Події для студентів Львова</h2>
+    <p>Квізи, концерти, лекції та майстер-класи з пільгами для студентів. Увійдіть, щоб переглянути події.</p>
+    <button id="login-btn" class="login">Увійти</button>
+  </section>
+  <div data-auth="in" hidden>
+    <div id="status" class="status"></div>
+    <div id="events" class="grid"></div>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const API = "http://localhost:8000/api";
+const state = { university: "", category: "", q: "" };
+
+const els = {
+  tabs: document.querySelectorAll("button.tab"),
+  search: document.getElementById("search"),
+  chips: document.getElementById("chips"),
+  events: document.getElementById("events"),
+  status: document.getElementById("status"),
+};
+
+async function request(path, params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v)
+  ).toString();
+  const headers = {};
+  const token = window.Studeal.getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${API}${path}${qs ? "?" + qs : ""}`, { headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function setStatus(text, isError = false) {
+  els.status.className = isError ? "status error" : "status";
+  els.status.textContent = text;
+}
+
+// Час показуємо за Києвом, бо так записано в CSV.
+function formatDate(iso) {
+  return new Date(iso).toLocaleString("uk-UA", {
+    timeZone: "Europe/Kyiv",
+    weekday: "short",
+    day: "numeric",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function renderCard(event) {
+  const card = el("article", "card");
+  if (event.image_url) {
+    const img = el("img");
+    img.src = event.image_url;
+    img.alt = event.title;
+    img.loading = "lazy";
+    card.append(img);
+  } else {
+    card.append(el("div", "placeholder", "Фото ще немає"));
+  }
+  const body = el("div", "body");
+  body.append(el("div", "date", formatDate(event.starts_at)));
+  body.append(el("div", "title", event.title));
+  if (event.venue) body.append(el("p", "venue", event.venue));
+  if (event.address) body.append(el("p", "meta", event.address));
+  if (event.price) body.append(el("span", "price", event.price));
+  if (event.source_url) {
+    const a = el("a", null, "Детальніше →");
+    a.href = event.source_url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    body.append(a);
+  }
+  card.append(body);
+  return card;
+}
+
+function makeChip(label, value) {
+  const b = el("button", "chip", label);
+  b.dataset.category = value;
+  if (state.category === value) b.classList.add("active");
+  b.addEventListener("click", () => {
+    state.category = value;
+    document.querySelectorAll(".chip").forEach((x) =>
+      x.classList.toggle("active", x.dataset.category === value)
+    );
+    loadEvents();
+  });
+  return b;
+}
+
+async function loadCategories() {
+  try {
+    const categories = await request("/events/categories");
+    els.chips.innerHTML = "";
+    els.chips.append(makeChip("Усі категорії", ""));
+    categories.forEach((c) => els.chips.append(makeChip(c, c)));
+  } catch (err) {
+    setStatus("Не вдалося завантажити категорії.", true);
+  }
+}
+
+async function loadEvents() {
+  setStatus("Завантаження…");
+  try {
+    const events = await request("/events", {
+      category: state.category,
+      university: state.university,
+      q: state.q.trim(),
+    });
+    els.events.innerHTML = "";
+    if (events.length === 0) {
+      setStatus("Найближчих подій не знайдено.");
+      return;
+    }
+    setStatus(`Знайдено: ${events.length}`);
+    events.forEach((e) => els.events.append(renderCard(e)));
+  } catch (err) {
+    setStatus("Помилка завантаження. Чи запущено API на localhost:8000?", true);
+  }
+}
+
+els.tabs.forEach((tab) =>
+  tab.addEventListener("click", () => {
+    const isOn = tab.classList.toggle("active");
+    state.university = isOn ? tab.dataset.university : "";
+    loadEvents();
+  })
+);
+
+let timer;
+els.search.addEventListener("input", (e) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    state.q = e.target.value;
+    loadEvents();
+  }, 300);
+});
+
+async function start() {
+  const signedIn = await window.Studeal.init();
+  if (!signedIn) return;
+  await loadCategories();
+  loadEvents();
+}
+start();
+</script>
+</body>
+</html>
