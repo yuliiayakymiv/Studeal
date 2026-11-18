@@ -14,7 +14,8 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-install-project
 
 COPY . .
+RUN if [ -d /app/seed_data ]; then mkdir -p /docs && cp -r /app/seed_data /docs/data; fi
 
 EXPOSE 8000
-# Applies database migrations on every start, then serves the API (same as spry).
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Applies database migrations and idempotent CSV seed on start, then serves the API.
+CMD ["sh", "-c", "alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
