@@ -5,7 +5,7 @@ Yuliia Yakymiv, Yuliia Dub, Khrystyna Shymushovska
 
 ## Links
 - Repository: https://github.com/yuliiayakymiv/Studeal
-- Demo (HTTPS): `https://<id>.cloudfront.net` _(paste your CloudFront domain after running `05-frontend.sh` / `07-auth.sh`)_
+- Demo (HTTPS): https://d1lp3tn7jna3tf.cloudfront.net
 
 ## Who we showed it to
 
