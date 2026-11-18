@@ -32,6 +32,7 @@ class EventOut(BaseModel):
     source_url: str | None
     image_url: str | None
     university: str | None
+    category: str | None
 
 
 class MeOut(BaseModel):

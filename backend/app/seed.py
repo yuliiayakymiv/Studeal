@@ -47,10 +47,10 @@ EVENT_FIELDS = [
     "source_url",
     "image_url",
     "university",
+    "category"
 ]
 # May be left out of the CSV entirely.
-OPTIONAL_COLUMNS = {"image_url", "description", "university"}
-
+OPTIONAL_COLUMNS = {"image_url", "description", "university", "category"}
 
 def _clean(value: str | None) -> str | None:
     value = (value or "").strip()
@@ -85,6 +85,7 @@ def _parse_event(row: dict, line: int) -> dict:
     starts = datetime.fromisoformat(row["starts_at"])
     row["starts_at"] = starts if starts.tzinfo else starts.replace(tzinfo=KYIV)
     row["university"] = row["university"] and row["university"].lower()
+    row["category"] = row["category"] and row["category"].lower()
     return row
 
 

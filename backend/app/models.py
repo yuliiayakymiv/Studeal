@@ -45,6 +45,7 @@ class Event(Base):
     source_url: Mapped[str | None] = mapped_column(Text)
     image_url: Mapped[str | None] = mapped_column(Text)
     university: Mapped[str | None] = mapped_column(String(20), index=True)  # e.g. "ucu"
+    category: Mapped[str | None] = mapped_column(String(50), index=True)  # e.g. "quiz", "concert"
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
