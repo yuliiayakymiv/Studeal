@@ -1,6 +1,6 @@
 # Studeal
 
-A website that collects student discounts and events in Lviv: cafés, coworkings, gyms, concerts and workshops that give a discount for a student ID.
+A website that collects student discounts and events in Lviv: cafés, coworkings, gyms, concerts and workshops that give a discount for a student ID. Students sign up (email or Google), filter by category and university, save deals and events, and with **Studeal+** ($5, demo payment) get an email when the venues they follow have a discount.
 
 **Team:** Yuliia Yakymiv, Yuliia Dub, Khrystyna Shymushovska
 
@@ -70,9 +70,10 @@ Or step by step:
 | A2.3 | `bash infra/aws/03-image.sh` | ECR repo `studeal-backend` + initial Docker image (with `docs/data/*.csv` bundled) |
 | A2.4 | `bash infra/aws/04-ecs.sh` | ECS Fargate cluster `studeal`, task definition, ALB `studeal-alb`, service `studeal-backend` |
 | A2.5 | `bash infra/aws/05-frontend.sh` | Private S3 bucket + CloudFront distribution (`/*` → S3, `/api/*` → ALB) + initial frontend deploy |
-| A2.6 | `bash infra/aws/06-oidc.sh` | GitHub Actions OIDC provider and deploy role `studeal-github-deploy` |
+| A2.6 | `bash infra/aws/06-oidc.sh` | GitHub OIDC provider and role `studeal-github-deploy` (optional, for a future CI; today deploys run with the `make deploy-*` commands below) |
 | A3 | `make deploy-auth` (`07-auth.sh`) | CloudFormation stack `studeal-auth` (`infra/auth.yml`: Cognito User Pool: email + password and Google, Studeal-branded sign-in page from `infra/branding/`; needs `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `.env`, see `infra/README.md`), CloudFront SPA routing function, frontend rebuild with `VITE_COGNITO_*` |
 | A3/A4 | `make deploy-api-auth` (`08-api-auth.sh`) | Sets `COGNITO_ISSUER` and `COGNITO_CLIENT_ID` on the ECS task definition and rolls the service |
+| Studeal+ | `make deploy-mail` (`09-mail.sh`) | SMTP account for the Studeal+ emails: password from `.env` into SSM, settings onto the ECS task (see `infra/README.md`) |
 
 ### Deploying updates & seeding RDS
 

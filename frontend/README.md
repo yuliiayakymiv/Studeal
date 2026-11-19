@@ -17,10 +17,11 @@ npm run lint                 # oxlint
 | Path | Page | Sign-in |
 |---|---|---|
 | `/` | Home: what Studeal is, sign-in button | — |
-| `/catalog` | Deals: category filter, UCU filter, search, save | required |
+| `/catalog` | Deals: category and university filters, search, save | required |
 | `/deals/:id` | One deal, save / unsave | required |
-| `/events` | Events: category filter, UCU filter | required |
-| `/saved` | Saved deals | required |
+| `/events` | Events: category and university filters, search, save | required |
+| `/saved` | Saved deals and events | required |
+| `/subscription` | Studeal+: demo payment of $5, venues to follow for email alerts | required |
 
 ## Configuration (`.env.local`, not committed)
 
@@ -37,8 +38,8 @@ Vite builds these values into the app, so they must be set when running `npm run
 
 ```
 src/
-  pages/         Home, Catalog, DealPage, Events, Saved
-  components/    Header, DealCard, ui/ (shadcn components)
+  pages/         Home, Catalog, DealPage, Events, Saved, Subscription
+  components/    Header, Footer, DealCard, EventCard, ShimmerButton, ui/ (shadcn components)
   lib/           api.js (API calls), auth.js (Cognito), devAuth.jsx (local mode),
-                 categories.js, themes.js
+                 categories.js (categories, universities), emptyMessage.js, themes.js
 ```
