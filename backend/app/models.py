@@ -60,6 +60,17 @@ class SavedDeal(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+class SavedEvent(Base):
+    """An event a user saved. user_id = Cognito "sub" of the user."""
+
+    __tablename__ = "saved_events"
+
+    user_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    event_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("events.id", ondelete="CASCADE"), primary_key=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 
 class User(Base):
     """Someone who signed in at least once (id = Cognito "sub"). Used for the usage stats."""

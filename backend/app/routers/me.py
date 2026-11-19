@@ -6,8 +6,8 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app.auth import UserDep
 from app.db import SessionDep
-from app.models import Deal, SavedDeal
-from app.schemas import DealOut, MeOut
+from app.models import Deal, Event, SavedDeal, SavedEvent
+from app.schemas import DealOut, EventOut, MeOut
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -43,6 +43,37 @@ async def save_deal(deal_id: uuid.UUID, user: UserDep, session: SessionDep) -> R
 async def unsave_deal(deal_id: uuid.UUID, user: UserDep, session: SessionDep) -> Response:
     await session.execute(
         delete(SavedDeal).where(SavedDeal.user_id == user, SavedDeal.deal_id == deal_id)
+    )
+    await session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/saved-events", response_model=list[EventOut])
+async def list_saved_events(user: UserDep, session: SessionDep) -> list[Event]:
+    query = (
+        select(Event)
+        .join(SavedEvent, SavedEvent.event_id == Event.id)
+        .where(SavedEvent.user_id == user)
+        .order_by(Event.starts_at)
+    )
+    return list(await session.scalars(query))
+
+
+@router.post("/saved-events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def save_event(event_id: uuid.UUID, user: UserDep, session: SessionDep) -> Response:
+    if await session.get(Event, event_id) is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Event not found")
+    await session.execute(
+        insert(SavedEvent).values(user_id=user, event_id=event_id).on_conflict_do_nothing()
+    )
+    await session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete("/saved-events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def unsave_event(event_id: uuid.UUID, user: UserDep, session: SessionDep) -> Response:
+    await session.execute(
+        delete(SavedEvent).where(SavedEvent.user_id == user, SavedEvent.event_id == event_id)
     )
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
