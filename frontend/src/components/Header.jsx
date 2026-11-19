@@ -24,7 +24,10 @@ export default function Header() {
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 p-4">
-        <Link to="/" className="text-xl font-bold">Studeal</Link>
+        <Link to="/" className="flex items-center gap-2 text-xl font-bold">
+          <img src="/favicon.svg" alt="" className="h-8 w-8" />
+          Studeal
+        </Link>
 
         {auth.isAuthenticated && (
           <nav className="flex flex-wrap gap-2">

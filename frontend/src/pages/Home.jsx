@@ -8,7 +8,7 @@ export default function Home() {
 
   if (!auth.isAuthenticated) {
     return (
-      <section className="mx-auto mt-16 max-w-md space-y-4 text-center">
+      <section className="mx-auto mt-28 max-w-md space-y-4 text-center">
         <h1 className="text-3xl font-bold">Знижки і події для студентів Львова</h1>
         <p className="text-muted-foreground">
           Щоб побачити знижки й події, увійдіть або зареєструйтеся.
@@ -21,7 +21,7 @@ export default function Home() {
   }
 
   return (
-    <section className="mx-auto mt-10 max-w-xl space-y-4 text-center">
+    <section className="mx-auto mt-24 max-w-xl space-y-4 text-center">
       <h1 className="text-3xl font-bold">Вітаємо у Studeal</h1>
       <p className="text-muted-foreground">
         Studeal збирає студентські знижки та події у Львові: кав'ярні, коворкінги, спортзали,
