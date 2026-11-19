@@ -47,6 +47,18 @@ Or execute each script individually:
 
 ### 3. Cognito Authentication (A3)
 
+Sign-in offers email + password and **Continue with Google**. Before the first run, create a Google OAuth client (once):
+
+1. [Google Cloud console](https://console.cloud.google.com/) → new project → *Google Auth Platform* → consent screen: External, scopes `openid`, `email`, `profile`, publish it ("In production").
+2. *Clients* → *Create client* → *Web application*. Copy the client id and secret into the repo-root `.env`:
+   ```sh
+   GOOGLE_CLIENT_ID=…apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=…
+   ```
+3. Run the commands below. At the end `07-auth.sh` prints the **Authorised JavaScript origin** and **Authorised redirect URI**: add both to that Google client.
+
+The look of the sign-in page (Studeal colours, logo, background) is in [`branding/`](branding/): edit `settings.json` or an `.svg` there, run `python infra/branding/render.py` (it writes them into `auth.yml`), then `make deploy-auth` again.
+
 ```sh
 make deploy-auth      # runs bash infra/aws/07-auth.sh
 make deploy-api-auth  # runs bash infra/aws/08-api-auth.sh

@@ -11,7 +11,7 @@ A website that collects student discounts and events in Lviv: cafés, coworkings
 ```
 backend/    FastAPI + PostgreSQL API: app/ (code), alembic/ (migrations), tests/
 frontend/   The website users see (React + Vite + Tailwind + Cognito OIDC)
-infra/      Deployment on AWS (eu-central-1): infra/aws/ scripts + infra/auth.yml
+infra/      Deployment on AWS (eu-central-1): infra/aws/ scripts, infra/auth.yml (sign-in), infra/branding/ (sign-in page look)
 docs/       Demo report (docs/report.md), seed data (docs/data/*.csv)
 README.md   This file
 ```
@@ -71,7 +71,7 @@ Or step by step:
 | A2.4 | `bash infra/aws/04-ecs.sh` | ECS Fargate cluster `studeal`, task definition, ALB `studeal-alb`, service `studeal-backend` |
 | A2.5 | `bash infra/aws/05-frontend.sh` | Private S3 bucket + CloudFront distribution (`/*` → S3, `/api/*` → ALB) + initial frontend deploy |
 | A2.6 | `bash infra/aws/06-oidc.sh` | GitHub Actions OIDC provider and deploy role `studeal-github-deploy` |
-| A3 | `make deploy-auth` (`07-auth.sh`) | CloudFormation stack `studeal-auth` (`infra/auth.yml`: Cognito User Pool email + password), CloudFront SPA routing function, frontend rebuild with `VITE_COGNITO_*` |
+| A3 | `make deploy-auth` (`07-auth.sh`) | CloudFormation stack `studeal-auth` (`infra/auth.yml`: Cognito User Pool: email + password and Google, Studeal-branded sign-in page from `infra/branding/`; needs `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `.env`, see `infra/README.md`), CloudFront SPA routing function, frontend rebuild with `VITE_COGNITO_*` |
 | A3/A4 | `make deploy-api-auth` (`08-api-auth.sh`) | Sets `COGNITO_ISSUER` and `COGNITO_CLIENT_ID` on the ECS task definition and rolls the service |
 
 ### Deploying updates & seeding RDS

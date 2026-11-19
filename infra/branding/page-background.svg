@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="pct" width="120" height="120" patternUnits="userSpaceOnUse">
+      <text x="30" y="45" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#e3e5f3">%</text>
+      <text x="90" y="105" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#ece7dc">%</text>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="#f5f6fb"/>
+  <rect width="1920" height="1080" fill="url(#pct)"/>
+</svg>

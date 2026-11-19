@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Sign-in with Cognito (Lab 4): email + password.
+# Sign-in with Cognito (Lab 4): email + password and "Continue with Google", Studeal look.
+# Needs in the repo-root .env (git-ignored, never committed):
+#   GOOGLE_CLIENT_ID=…   GOOGLE_CLIENT_SECRET=…   (optional: COGNITO_DOMAIN_PREFIX=…)
+# The sign-in page look lives in infra/branding/ (edit there, then: python infra/branding/render.py).
 source "$(dirname "$0")/env.sh"
 cd "$(dirname "$0")/../.."
 : "${CF_DIST_ID:?run 05-frontend.sh first}" "${CF_DOMAIN:?run 05-frontend.sh first}"
@@ -9,13 +12,18 @@ PREFIX="${COGNITO_DOMAIN_PREFIX:-$(envval COGNITO_DOMAIN_PREFIX)}"
 if [[ -z "$PREFIX" ]]; then
   PREFIX="studeal-$ACCOUNT_ID"
 fi
+GID="${GOOGLE_CLIENT_ID:-$(envval GOOGLE_CLIENT_ID)}"
+GSECRET="${GOOGLE_CLIENT_SECRET:-$(envval GOOGLE_CLIENT_SECRET)}"
+: "${GID:?set GOOGLE_CLIENT_ID in .env (see infra/README.md, Google sign-in)}" \
+  "${GSECRET:?set GOOGLE_CLIENT_SECRET in .env}"
 AUTH_STACK="${AUTH_STACK:-studeal-auth}"
 SITE_URL="https://$CF_DOMAIN"
 
-step "CloudFormation stack $AUTH_STACK (user pool, app client, domain $PREFIX)"
+step "CloudFormation stack $AUTH_STACK (user pool, Google IdP, app client, domain $PREFIX, branding)"
 aws cloudformation deploy --stack-name "$AUTH_STACK" --template-file infra/auth.yml \
   --no-fail-on-empty-changeset --tags PROJECT_NAME=studeal \
-  --parameter-overrides DomainPrefix="$PREFIX" SiteUrl="$SITE_URL"
+  --parameter-overrides DomainPrefix="$PREFIX" SiteUrl="$SITE_URL" \
+    GoogleClientId="$GID" GoogleClientSecret="$GSECRET"
 save AUTH_STACK "$AUTH_STACK"
 
 step "CloudFront Function: SPA routes (/catalog, /events, /saved, /deal/*) -> /index.html"
@@ -68,6 +76,7 @@ POOL_ID=$(out UserPoolId)
 CLIENT_ID=$(out UserPoolClientId)
 ISSUER=$(out Authority)
 COGNITO_DOMAIN=$(out CognitoDomain)
+GOOGLE_REDIRECT=$(out GoogleRedirectUri)
 
 cat <<TXT
 
@@ -84,6 +93,11 @@ For Person 1 (Backend — .env):
   COGNITO_ISSUER=$ISSUER
   COGNITO_CLIENT_ID=$CLIENT_ID
 ===========================================================================
+
+Google OAuth client must have (Google Cloud console → Clients → your Web client):
+  Authorised JavaScript origin:  $COGNITO_DOMAIN
+  Authorised redirect URI:       $GOOGLE_REDIRECT
+Consent screen: External, scopes openid/email/profile only, status "In production".
 
 Site URL:  $SITE_URL
 Next:      bash infra/aws/08-api-auth.sh (or make deploy-api-auth)
