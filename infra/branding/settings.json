@@ -28,7 +28,7 @@
       },
       "location": {
         "horizontal": "CENTER",
-        "vertical": "CENTER"
+        "vertical": "START"
       },
       "sessionTimerDisplay": "NONE"
     },
@@ -40,7 +40,7 @@
       "pageHeader": {
         "enabled": false
       },
-      "spacingDensity": "REGULAR"
+      "spacingDensity": "CONDENSED"
     },
     "signUp": {
       "acceptanceElements": [
