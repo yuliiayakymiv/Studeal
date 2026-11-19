@@ -1,8 +1,9 @@
+import { emptyMessage } from "@/lib/emptyMessage";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { apiFetch } from "@/lib/api";
-import { EVENT_CATEGORIES } from "@/lib/categories";
+import { DEAL_CATEGORIES, UNIVERSITIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EventCard from "@/components/EventCard";
@@ -101,7 +102,7 @@ export default function Events() {
 
       {!error && loaded && events.length === 0 && (
         <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          Вибачте, зараз нема дійсних подій.
+          {emptyMessage("подій", { university, category })}
         </p>
       )}
 

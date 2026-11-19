@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import Header from "@/components/Header";
@@ -17,9 +18,9 @@ function RequireAuth({ children }) {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="flex min-h-screen flex-col bg-muted/30">
       <Header />
-      <main className="mx-auto max-w-5xl p-4">
+      <main className="mx-auto w-full max-w-5xl flex-1 p-4">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<RequireAuth><Catalog /></RequireAuth>} />
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/saved" element={<RequireAuth><Saved /></RequireAuth>} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }
