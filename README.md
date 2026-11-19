@@ -12,7 +12,7 @@ A website that collects student discounts and events in Lviv: cafés, coworkings
 backend/    FastAPI + PostgreSQL API: app/ (code), alembic/ (migrations), tests/
 frontend/   The website users see (React + Vite + Tailwind + Cognito OIDC)
 infra/      Deployment on AWS (eu-central-1): infra/aws/ scripts, infra/auth.yml (sign-in), infra/branding/ (sign-in page look)
-docs/       Demo report (docs/report.md), seed data (docs/data/*.csv)
+docs/       Seed data: deals and events (docs/data/*.csv)
 README.md   This file
 ```
 

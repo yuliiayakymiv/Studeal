@@ -3,7 +3,8 @@
 Files (one header row, UTF-8, exported from Google Sheets: File → Download → CSV):
   docs/data/deals.csv   venue,title,category,discount,address,valid_until,source_url
                         [,image_url,description,university]
-  docs/data/events.csv  title,venue,starts_at,address,price,source_url[,image_url,university]
+  docs/data/events.csv  title,venue,starts_at,address,price,source_url
+                        [,image_url,university,category]
 
 A row with the same deal (venue + title) or event (title + starts_at) is updated, not duplicated.
 Dates: valid_until = 2026-12-31 (or empty), starts_at = 2026-11-20 19:00 (Kyiv time).
