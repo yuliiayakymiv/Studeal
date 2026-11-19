@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="mt-12 border-t bg-muted/40">
+    <footer className="mt-12 border-t bg-muted/70">
       <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 p-6 text-sm text-muted-foreground sm:flex-row">
         <p>© {new Date().getFullYear()} Studeal</p>
         <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-4">
