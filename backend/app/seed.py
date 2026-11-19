@@ -18,6 +18,7 @@ from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from sqlalchemy import delete, tuple_
 from sqlalchemy.dialects.postgresql import insert
 
 from app.config import settings
@@ -102,6 +103,13 @@ async def seed(seed_dir: Path = settings.seed_dir) -> tuple[int, int]:
                 stmt.on_conflict_do_update(
                     constraint="uq_deals_venue_title",
                     set_={f: stmt.excluded[f] for f in DEAL_FIELDS},
+                )
+            )
+            await session.execute(
+                delete(Deal).where(
+                    tuple_(Deal.venue, Deal.title).not_in(
+                        [(d["venue"], d["title"]) for d in deals]
+                    )
                 )
             )
         if events:
