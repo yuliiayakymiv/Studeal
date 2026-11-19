@@ -48,6 +48,25 @@ async def test_deals_list_filter_and_get(client: AsyncClient) -> None:
     assert (await client.get("/api/deals/123")).status_code == 422  # ids are UUIDs, as in spry
 
 
+async def test_expired_deals_are_hidden(client: AsyncClient) -> None:
+    today = date.today()
+    await _add(
+        client,
+        Deal(venue="Old", title="Ended", category="coffee", valid_until=today - timedelta(days=2)),
+        Deal(
+            venue="Now",
+            title="Ends later",
+            category="coffee",
+            valid_until=today + timedelta(days=5),
+        ),
+        Deal(venue="Open", title="No end date", category="coffee"),
+    )
+    current = (await client.get("/api/deals")).json()
+    assert [d["venue"] for d in current] == ["Now", "Open"]
+    everything = (await client.get("/api/deals", params={"include_expired": "true"})).json()
+    assert len(everything) == 3
+
+
 async def test_events_upcoming_only(client: AsyncClient) -> None:
     now = datetime.now(UTC)
     await _add(

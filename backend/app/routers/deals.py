@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import or_, select
@@ -10,6 +12,8 @@ from app.schemas import DealOut
 
 router = APIRouter(prefix="/deals", tags=["deals"])
 
+KYIV = ZoneInfo("Europe/Kyiv")
+
 
 @router.get("", response_model=list[DealOut])
 async def list_deals(
@@ -18,14 +22,19 @@ async def list_deals(
     category: str | None = None,
     university: str | None = None,
     q: str | None = None,
+    include_expired: bool = False,
 ) -> list[Deal]:
-    """All deals. Filters can be combined:
+    """Current deals (no `valid_until`, or it is today or later in Kyiv). Filters can be combined:
 
     - `?category=coffee`
     - `?university=ucu` — only that university's places
     - `?q=кава` — search in venue, title, conditions and address (case-insensitive)
+    - `?include_expired=true` — also deals whose `valid_until` has passed
     """
     query = select(Deal).order_by(Deal.venue, Deal.title)
+    if not include_expired:
+        today = datetime.now(KYIV).date()
+        query = query.where(or_(Deal.valid_until.is_(None), Deal.valid_until >= today))
     if category:
         query = query.where(Deal.category == category)
     if university:

@@ -19,7 +19,7 @@ FastAPI + PostgreSQL (async SQLAlchemy, Alembic), same setup as spry. Run everyt
 | Method | Path | Auth | What |
 |---|---|---|---|
 | GET | `/api/health` | — | API and database are up |
-| GET | `/api/deals?category=coffee&university=ucu&q=кава` | token | Deals; filter by category, university, search text (all optional) |
+| GET | `/api/deals?category=coffee&university=ucu&q=кава` | token | Current deals (expired ones hidden, `?include_expired=true` for all); filter by category, university, search text (all optional) |
 | GET | `/api/deals/categories` | token | Categories that have deals |
 | GET | `/api/deals/{id}` | token | One deal |
 | GET | `/api/events` | token | Upcoming events (`?university=ucu`, `?q=` search, `?include_past=true` for all) |
