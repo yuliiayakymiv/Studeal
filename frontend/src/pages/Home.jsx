@@ -29,9 +29,9 @@ export default function Home() {
         Цікаві пропозиції зберігайте, щоб не загубити їх.
       </p>
       <div className="flex flex-wrap justify-center gap-3 pt-2">
-        <Button asChild variant="outline" className="bg-muted/70"><Link to="/catalog">Знижки</Link></Button>
-        <Button asChild variant="outline" className="bg-muted/70"><Link to="/events">Події</Link></Button>
-        <Button asChild variant="outline" className="bg-muted/70"><Link to="/saved">Збережені</Link></Button>
+        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white"><Link to="/catalog">Знижки</Link></Button>
+        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white"><Link to="/events">Події</Link></Button>
+        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white"><Link to="/saved">Збережені</Link></Button>
       </div>
     </section>
   );
