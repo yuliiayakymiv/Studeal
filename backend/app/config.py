@@ -17,6 +17,14 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://localhost:3000",
     ]
+    # Emails for Studeal+ subscribers. Empty smtp_host = emails are only written to the log
+    # (`make logs s=backend`), so everything works locally without a mail account.
+    smtp_host: str = ""  # e.g. smtp.gmail.com
+    smtp_port: int = 587  # STARTTLS
+    smtp_user: str = ""
+    smtp_password: str = ""  # Gmail: an app password, never the account password
+    mail_from: str = "Studeal <studeal.lviv@gmail.com>"
+    site_url: str = "https://d1lp3tn7jna3tf.cloudfront.net"  # links in the emails
     # CSV files for `make seed`: docs/data/ in the repo (mounted at /docs/data in Docker).
     seed_dir: Path = Path(__file__).resolve().parents[2] / "docs" / "data"
 

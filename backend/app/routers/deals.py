@@ -57,6 +57,12 @@ async def list_categories(session: SessionDep, _user: UserDep) -> list[str]:
     return list(await session.scalars(select(Deal.category).distinct().order_by(Deal.category)))
 
 
+@router.get("/venues", response_model=list[str])
+async def list_venues(session: SessionDep, _user: UserDep) -> list[str]:
+    """Venue names, for suggestions when following a venue (Studeal+)."""
+    return list(await session.scalars(select(Deal.venue).distinct().order_by(Deal.venue)))
+
+
 @router.get("/{deal_id}", response_model=DealOut)
 async def get_deal(deal_id: uuid.UUID, session: SessionDep, _user: UserDep) -> Deal:
     deal = await session.get(Deal, deal_id)

@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DealOut(BaseModel):
@@ -52,3 +52,26 @@ class StatsOut(BaseModel):
     users_active_7d: int  # signed in during the last 7 days
     saved_total: int  # deals saved, all users together
     top_saved: list[TopDeal]
+
+
+class FollowedVenueOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    deals_now: int = 0  # current deals that match this name
+
+
+class SubscriptionOut(BaseModel):
+    active: bool
+    email: str | None
+    price_usd: int
+    venues: list[FollowedVenueOut]
+
+
+class SubscribeIn(BaseModel):
+    email: str = Field(max_length=320, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+class FollowIn(BaseModel):
+    name: str = Field(min_length=2, max_length=200)

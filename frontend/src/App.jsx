@@ -7,6 +7,7 @@ import Catalog from "@/pages/Catalog";
 import DealPage from "@/pages/DealPage";
 import Events from "@/pages/Events";
 import Saved from "@/pages/Saved";
+import Subscription from "@/pages/Subscription";
 
 // Незалогіненим показуємо головну і нічого не вантажимо.
 function RequireAuth({ children }) {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/deals/:id" element={<RequireAuth><DealPage /></RequireAuth>} />
           <Route path="/events" element={<RequireAuth><Events /></RequireAuth>} />
           <Route path="/saved" element={<RequireAuth><Saved /></RequireAuth>} />
+          <Route path="/subscription" element={<RequireAuth><Subscription /></RequireAuth>} />
         </Routes>
       </main>
       <Footer />

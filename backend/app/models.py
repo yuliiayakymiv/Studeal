@@ -1,7 +1,17 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, String, Text, UniqueConstraint, Uuid, func
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -60,6 +70,7 @@ class SavedDeal(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+
 class SavedEvent(Base):
     """An event a user saved. user_id = Cognito "sub" of the user."""
 
@@ -91,3 +102,41 @@ class UserVisit(Base):
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     day: Mapped[date] = mapped_column(Date, primary_key=True)
+
+
+class Subscription(Base):
+    """Studeal+ ($5): the user gets an email when a followed venue has a student discount.
+
+    Payment is a demo for now: pressing "pay" turns the subscription on, no money moves.
+    """
+
+    __tablename__ = "subscriptions"
+
+    user_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    email: Mapped[str] = mapped_column(String(320))  # where the notifications go
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class FollowedVenue(Base):
+    """A shop, café, gym… a subscriber wants to hear about (as they typed it)."""
+
+    __tablename__ = "followed_venues"
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_followed_venues_user_name"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[str] = mapped_column(String(64), index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class DealNotification(Base):
+    """An email about this deal was already sent to this user (so it is sent only once)."""
+
+    __tablename__ = "deal_notifications"
+
+    user_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    deal_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("deals.id", ondelete="CASCADE"), primary_key=True
+    )
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

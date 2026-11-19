@@ -9,6 +9,8 @@ Files (one header row, UTF-8, exported from Google Sheets: File → Download →
 A row with the same deal (venue + title) or event (title + starts_at) is updated, not duplicated.
 Dates: valid_until = 2026-12-31 (or empty), starts_at = 2026-11-20 19:00 (Kyiv time).
 
+After seeding, Studeal+ subscribers get an email about new deals at venues they follow.
+
 Run: make seed
 """
 
@@ -25,6 +27,7 @@ from sqlalchemy.dialects.postgresql import insert
 from app.config import settings
 from app.db import SessionLocal, engine
 from app.models import Deal, Event
+from app.notify import notify
 
 KYIV = ZoneInfo("Europe/Kyiv")
 
@@ -49,10 +52,11 @@ EVENT_FIELDS = [
     "source_url",
     "image_url",
     "university",
-    "category"
+    "category",
 ]
 # May be left out of the CSV entirely.
 OPTIONAL_COLUMNS = {"image_url", "description", "university", "category"}
+
 
 def _clean(value: str | None) -> str | None:
     value = (value or "").strip()
@@ -108,9 +112,7 @@ async def seed(seed_dir: Path = settings.seed_dir) -> tuple[int, int]:
             )
             await session.execute(
                 delete(Deal).where(
-                    tuple_(Deal.venue, Deal.title).not_in(
-                        [(d["venue"], d["title"]) for d in deals]
-                    )
+                    tuple_(Deal.venue, Deal.title).not_in([(d["venue"], d["title"]) for d in deals])
                 )
             )
         if events:
@@ -127,8 +129,11 @@ async def seed(seed_dir: Path = settings.seed_dir) -> tuple[int, int]:
 
 async def main() -> None:
     deals, events = await seed()
-    await engine.dispose()
     print(f"seeded {deals} deals and {events} events from {settings.seed_dir}")
+    async with SessionLocal() as session:  # Studeal+: email subscribers about new deals
+        emails = await notify(session)
+    await engine.dispose()
+    print(f"sent {emails} Studeal+ emails")
 
 
 if __name__ == "__main__":

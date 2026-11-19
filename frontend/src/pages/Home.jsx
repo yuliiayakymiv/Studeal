@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { Button } from "@/components/ui/button";
+import ShimmerButton from "@/components/ShimmerButton";
 
 export default function Home() {
   const auth = useAuth();
+  const navigate = useNavigate();
   if (auth.isLoading) return <p className="text-muted-foreground">Завантаження…</p>;
 
   if (!auth.isAuthenticated) {
@@ -16,6 +18,11 @@ export default function Home() {
         <Button size="lg" onClick={() => auth.signinRedirect()}>
           Sign in / Sign up
         </Button>
+        <div className="pt-10">
+          <ShimmerButton onClick={() => auth.signinRedirect()}>
+            Studeal+ за $5: знижки улюблених закладів на пошту
+          </ShimmerButton>
+        </div>
       </section>
     );
   }
@@ -29,9 +36,14 @@ export default function Home() {
         Цікаві пропозиції зберігайте, щоб не загубити їх.
       </p>
       <div className="flex flex-wrap justify-center gap-3 pt-2">
-        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white"><Link to="/catalog">Знижки</Link></Button>
-        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white"><Link to="/events">Події</Link></Button>
-        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white"><Link to="/saved">Збережені</Link></Button>
+        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white dark:bg-[#808080] dark:hover:bg-[#6e6e6e]"><Link to="/catalog">Знижки</Link></Button>
+        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white dark:bg-[#808080] dark:hover:bg-[#6e6e6e]"><Link to="/events">Події</Link></Button>
+        <Button asChild variant="outline" className="border-transparent bg-[#808080] text-white hover:bg-[#6e6e6e] hover:text-white dark:bg-[#808080] dark:hover:bg-[#6e6e6e]"><Link to="/saved">Збережені</Link></Button>
+      </div>
+      <div className="pt-10">
+        <ShimmerButton onClick={() => navigate("/subscription")}>
+          Studeal+ за $5: знижки улюблених закладів на пошту
+        </ShimmerButton>
       </div>
     </section>
   );

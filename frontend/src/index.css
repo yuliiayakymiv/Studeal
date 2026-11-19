@@ -128,3 +128,16 @@
     @apply font-sans;
     }
 }
+/* Кнопка підписки на головній: градієнт із кольорів тем повільно рухається. */
+.studeal-shimmer {
+  background-size: 300% 100%;
+  background-clip: border-box;
+  animation: studeal-shimmer 8s linear infinite;
+}
+@keyframes studeal-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 300% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studeal-shimmer { animation: none; }
+}

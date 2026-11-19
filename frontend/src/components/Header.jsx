@@ -34,6 +34,7 @@ export default function Header() {
             <Button asChild variant="ghost" size="sm"><Link to="/catalog">Знижки</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/events">Події</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/saved">Збережені</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/subscription">Studeal+</Link></Button>
           </nav>
         )}
 

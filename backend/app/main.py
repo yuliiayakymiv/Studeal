@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 from app.config import settings
 from app.db import SessionDep
-from app.routers import deals, events, me, stats
+from app.routers import deals, events, me, stats, subscription
 
 app = FastAPI(
     title="Studeal API",
@@ -33,4 +33,5 @@ api.include_router(deals.router)
 api.include_router(events.router)
 api.include_router(me.router)
 api.include_router(stats.router)
+api.include_router(subscription.router)
 app.include_router(api)
