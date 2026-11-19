@@ -1,8 +1,9 @@
+import { emptyMessage } from "@/lib/emptyMessage";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { apiFetch } from "@/lib/api";
-import { DEAL_CATEGORIES } from "@/lib/categories";
+import { DEAL_CATEGORIES, UNIVERSITIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DealCard from "@/components/DealCard";
@@ -82,14 +83,17 @@ export default function Catalog() {
         ))}
       </div>
 
-      <div className="flex">
-        <Button
-          size="sm"
-          variant={university === "ucu" ? "default" : "outline"}
-          onClick={() => updateParam("university", university === "ucu" ? "" : "ucu")}
-        >
-          УКУ
-        </Button>
+      <div className="flex flex-wrap gap-2">
+        {UNIVERSITIES.map((u) => (
+          <Button
+            key={u.value}
+            size="sm"
+            variant={university === u.value ? "default" : "outline"}
+            onClick={() => updateParam("university", university === u.value ? "" : u.value)}
+          >
+            {u.label}
+          </Button>
+        ))}
       </div>
 
       <Input
@@ -102,7 +106,7 @@ export default function Catalog() {
 
       {!error && loaded && deals.length === 0 && (
         <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          Вибачте, зараз нема дійсних знижок.
+          {emptyMessage("знижок", { university, category })}
         </p>
       )}
 
