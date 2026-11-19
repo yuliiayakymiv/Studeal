@@ -82,14 +82,17 @@ export default function Events() {
         ))}
       </div>
 
-      <div className="flex">
-        <Button
-          size="sm"
-          variant={university === "ucu" ? "default" : "outline"}
-          onClick={() => updateParam("university", university === "ucu" ? "" : "ucu")}
-        >
-          УКУ
-        </Button>
+      <div className="flex flex-wrap gap-2">
+        {UNIVERSITIES.map((u) => (
+          <Button
+            key={u.value}
+            size="sm"
+            variant={university === u.value ? "default" : "outline"}
+            onClick={() => updateParam("university", university === u.value ? "" : u.value)}
+          >
+            {u.label}
+          </Button>
+        ))}
       </div>
 
       <Input
@@ -105,6 +108,8 @@ export default function Events() {
           {emptyMessage("подій", { university, category })}
         </p>
       )}
+
+      {events.length > 0 && <p className="text-sm text-muted-foreground">Знайдено: {events.length}</p>}
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {events.map((e) => (
