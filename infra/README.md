@@ -68,6 +68,20 @@ At the end of `07-auth.sh`, the script prints the exact values to share with tea
 - **For Person 2 (Frontend):** `VITE_COGNITO_ISSUER`, `VITE_COGNITO_CLIENT_ID`, `VITE_COGNITO_DOMAIN`
 - **For Person 1 (Backend):** `UserPoolId`, `COGNITO_ISSUER`, `COGNITO_CLIENT_ID`
 
+### Studeal+ emails
+
+Subscribers get emails through an SMTP account (Gmail by default). Put the account into the repo-root `.env` and run the script once:
+
+```sh
+SMTP_USER=studeal.lviv@gmail.com
+SMTP_PASSWORD=<Gmail app password>   # myaccount.google.com/apppasswords (needs 2-Step Verification)
+```
+```sh
+make deploy-mail      # runs bash infra/aws/09-mail.sh
+```
+
+The password is stored in SSM (`/studeal/SMTP_PASSWORD`, SecureString) and passed to the ECS task as a secret; host, port, user and site URL become task environment variables. Later `make deploy-backend` runs keep them.
+
 ### 4. Continuous Deployment, Migrations & Seeding RDS (A4)
 
 - `make deploy-backend` — bundles `docs/data/*.csv`, builds & pushes `backend/Dockerfile`, rolls ECS service (container runs `alembic upgrade head && python -m app.seed` on startup).

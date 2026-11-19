@@ -6,7 +6,7 @@ LOCAL_DATABASE_URL := postgresql+asyncpg://studeal:studeal@localhost:$(DB_PORT)/
 
 .PHONY: help up down logs ps seed test migrate migration psql install dev-backend dev-frontend \
 	lint format clean deploy-backend release-backend rollback-backend deploy-frontend \
-	deploy-auth deploy-api-auth seed-rds teardown
+	deploy-auth deploy-api-auth deploy-mail seed-rds teardown
 
 .env:
 	cp .env.example .env
@@ -100,6 +100,9 @@ deploy-auth: ## Deploy Cognito User Pool (infra/auth.yml), CloudFront SPA routin
 
 deploy-api-auth: ## Set COGNITO_ISSUER & COGNITO_CLIENT_ID on ECS so API verifies Cognito tokens
 	bash infra/aws/08-api-auth.sh
+
+deploy-mail: ## Studeal+ emails: SMTP_USER/SMTP_PASSWORD from .env -> SSM + ECS task, roll service
+	bash infra/aws/09-mail.sh
 
 seed-rds: ## Run a one-off ECS Fargate task to apply migrations and seed docs/data/*.csv on RDS
 	bash infra/aws/seed.sh

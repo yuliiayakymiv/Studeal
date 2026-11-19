@@ -21,7 +21,7 @@ step "ECR repository and S3 bucket"
 try aws ecr delete-repository --repository-name "$ECR_REPOSITORY" --force
 [[ -n "${S3_BUCKET:-}" ]] && try aws s3 rb "s3://$S3_BUCKET" --force
 step "SSM parameters, log group"
-try aws ssm delete-parameters --names /studeal/DATABASE_URL /studeal/DB_PASSWORD
+try aws ssm delete-parameters --names /studeal/DATABASE_URL /studeal/DB_PASSWORD /studeal/SMTP_PASSWORD
 try aws logs delete-log-group --log-group-name "/ecs/$ECS_SERVICE"
 step "IAM roles"
 try aws iam delete-role-policy --role-name "$DEPLOY_ROLE" --policy-name deploy-studeal
