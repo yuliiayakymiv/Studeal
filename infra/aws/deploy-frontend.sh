@@ -33,8 +33,12 @@ echo "==> Building frontend (VITE_API_URL=${VITE_API_URL:-<same origin>})"
   VITE_COGNITO_DOMAIN="${VITE_COGNITO_DOMAIN:-}" npm run build)
 
 echo "==> Uploading to s3://$S3_BUCKET"
-aws s3 sync frontend/dist "s3://$S3_BUCKET" --delete --exclude index.html \
+# Only Vite's hashed files (assets/*) may be cached forever; favicon.svg and other files from
+# frontend/public keep their names, so browsers must check them for changes.
+aws s3 sync frontend/dist "s3://$S3_BUCKET" --delete --exclude "*" --include "assets/*" \
   --cache-control "public,max-age=31536000,immutable"
+aws s3 sync frontend/dist "s3://$S3_BUCKET" --delete --exclude "assets/*" --exclude index.html \
+  --cache-control "no-cache"
 aws s3 cp frontend/dist/index.html "s3://$S3_BUCKET/index.html" --cache-control "no-cache"
 
 echo "==> Invalidating CloudFront cache"
