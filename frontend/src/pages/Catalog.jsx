@@ -80,6 +80,9 @@ export default function Catalog() {
             {c.label}
           </Button>
         ))}
+      </div>
+
+      <div className="flex">
         <Button
           size="sm"
           variant={university === "ucu" ? "default" : "outline"}

@@ -5,19 +5,7 @@ import { apiFetch } from "@/lib/api";
 import { EVENT_CATEGORIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-
-// Час показуємо за Києвом, бо так записано в CSV.
-function formatDate(iso) {
-  return new Date(iso).toLocaleString("uk-UA", {
-    timeZone: "Europe/Kyiv",
-    weekday: "short",
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import EventCard from "@/components/EventCard";
 
 export default function Events() {
   const auth = useAuth();
@@ -29,6 +17,7 @@ export default function Events() {
 
   const [search, setSearch] = useState(q);
   const [events, setEvents] = useState([]);
+  const [savedIds, setSavedIds] = useState(new Set());
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
@@ -48,11 +37,31 @@ export default function Events() {
     if (!token) return;
     setError("");
     setLoaded(false);
-    apiFetch("/events", { token, params: { category, university, q } })
-      .then(setEvents)
+    Promise.all([
+      apiFetch("/me/saved-events", { token }),
+      apiFetch("/events", { token, params: { category, university, q } }),
+    ])
+      .then(([saved, list]) => {
+        setSavedIds(new Set(saved.map((e) => e.id)));
+        setEvents(list);
+      })
       .catch(() => setError("Помилка завантаження. Чи запущено API?"))
       .finally(() => setLoaded(true));
   }, [token, category, university, q]);
+
+  async function toggleSave(id, on) {
+    try {
+      await apiFetch(`/me/saved-events/${id}`, { token, method: on ? "POST" : "DELETE" });
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        if (on) next.add(id);
+        else next.delete(id);
+        return next;
+      });
+    } catch {
+      setError("Не вдалося зберегти.");
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -70,6 +79,9 @@ export default function Events() {
             {c.label}
           </Button>
         ))}
+      </div>
+
+      <div className="flex">
         <Button
           size="sm"
           variant={university === "ucu" ? "default" : "outline"}
@@ -95,27 +107,7 @@ export default function Events() {
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {events.map((e) => (
-          <Card key={e.id} className="overflow-hidden">
-            {e.image_url ? (
-              <img src={e.image_url} alt={e.title} loading="lazy" className="h-40 w-full object-cover" />
-            ) : (
-              <div className="flex h-40 items-center justify-center bg-muted text-sm text-muted-foreground">
-                Фото ще немає
-              </div>
-            )}
-            <CardContent className="space-y-2 p-4">
-              <p className="text-sm font-semibold text-primary">{formatDate(e.starts_at)}</p>
-              <p className="font-semibold">{e.title}</p>
-              {e.venue && <p className="text-sm text-muted-foreground">{e.venue}</p>}
-              {e.address && <p className="text-sm text-muted-foreground">{e.address}</p>}
-              {e.price && <p className="text-sm">{e.price}</p>}
-              {e.source_url && (
-                <a href={e.source_url} target="_blank" rel="noopener noreferrer" className="text-sm underline">
-                  Детальніше →
-                </a>
-              )}
-            </CardContent>
-          </Card>
+          <EventCard key={e.id} event={e} saved={savedIds.has(e.id)} onToggleSave={toggleSave} />
         ))}
       </div>
     </div>

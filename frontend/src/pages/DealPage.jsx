@@ -60,7 +60,12 @@ export default function DealPage() {
             </Button>
           )}
         </div>
-        <Link to="/catalog" className="text-sm underline">← До каталогу</Link>
+        <Link
+          to="/catalog"
+          className="text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
+        >
+          ← До каталогу
+        </Link>
       </CardContent>
     </Card>
   );

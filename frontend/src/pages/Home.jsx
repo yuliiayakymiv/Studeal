@@ -21,9 +21,14 @@ export default function Home() {
   }
 
   return (
-    <section className="mt-10 space-y-4 text-center">
+    <section className="mx-auto mt-10 max-w-xl space-y-4 text-center">
       <h1 className="text-3xl font-bold">Вітаємо у Studeal</h1>
-      <div className="flex flex-wrap justify-center gap-3">
+      <p className="text-muted-foreground">
+        Studeal збирає студентські знижки та події у Львові: кав'ярні, коворкінги, спортзали,
+        концерти й лекції. Обирайте категорію, шукайте за назвою або перегляньте події УКУ.
+        Цікаві пропозиції зберігайте, щоб не загубити їх.
+      </p>
+      <div className="flex flex-wrap justify-center gap-3 pt-2">
         <Button asChild><Link to="/catalog">Знижки</Link></Button>
         <Button asChild variant="outline"><Link to="/events">Події</Link></Button>
         <Button asChild variant="outline"><Link to="/saved">Збережені</Link></Button>
