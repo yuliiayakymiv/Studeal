@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { apiFetch } from "@/lib/api";
-import { DEAL_CATEGORIES, UNIVERSITIES } from "@/lib/categories";
+import { EVENT_CATEGORIES, UNIVERSITIES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EventCard from "@/components/EventCard";
